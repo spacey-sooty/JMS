@@ -1,0 +1,22 @@
+version: 2
+updates:
+  - package-ecosystem: "cargo"
+    directory: "/jms"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "cargo"
+    directory: "/jms-match-randomiser"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "cargo"
+    directory: "/jms-radio-config"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "cargo"
+    directory: "/jms-util"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "npm"
+    directory: "/jms-frontend"
+    schedule:
+      interval: "weekly"
