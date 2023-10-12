@@ -2,7 +2,7 @@ use std::collections::{HashMap, HashSet};
 
 use crate::{schedule::PlayoffAllianceDescriptor, models::{MatchSubtype, PlayoffAlliance, Match, Alliance}};
 
-use super::{IncompleteMatch, GenerationUpdate, create_tiebreaker, playoffs::PlayoffMatchGenerator};
+use super::{IncompleteMatch, GenerationUpdate, create_tiebreaker};
 
 // Note: this must be in order
 fn bracket_template(double_elim: bool) -> Vec<IncompleteMatch> {

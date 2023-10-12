@@ -174,7 +174,7 @@ impl FieldLights {
     // Update station modules based on station state
     if let_state_based {
       for (alliance, iter) in [(Alliance::Blue, self.blue.iter_mut()), (Alliance::Red, self.red.iter_mut())] {
-        let colour = if alliance == Alliance::Blue { Colour::new(0, 0, 255) } else { Colour::new(255, 0, 0) };
+        let _colour = if alliance == Alliance::Blue { Colour::new(0, 0, 255) } else { Colour::new(255, 0, 0) };
         let mut ok = true;
 
         for (i, els) in iter.enumerate() {

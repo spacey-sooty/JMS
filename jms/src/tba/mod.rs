@@ -1,4 +1,4 @@
-use std::convert::TryFrom;
+
 
 use anyhow::bail;
 
@@ -68,7 +68,7 @@ impl TBAWorker {
     let db = db::database();
     let mut details = models::EventDetails::watch(db)?;
     let mut teams = models::Team::table(db)?.watch_all();
-    let mut matches = models::Match::table(db)?.watch_all();
+    let _matches = models::Match::table(db)?.watch_all();
     let mut rankings = models::TeamRanking::table(db)?.watch_all();
     let mut alliances = models::PlayoffAlliance::table(db)?.watch_all();
     let mut match_records = models::MatchGenerationRecord::table(db)?.watch_all();
