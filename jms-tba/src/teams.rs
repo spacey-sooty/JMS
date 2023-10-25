@@ -1,5 +1,5 @@
 use jms_base::kv;
-use jms_core_lib::{models, db::Table};
+use jms_core_lib::{db::Table, models};
 
 use crate::client::TBAClient;
 
@@ -12,22 +12,22 @@ pub struct TBATeam(pub String);
 pub struct TBATeams(pub Vec<TBATeam>);
 
 impl From<models::Team> for TBATeam {
-  fn from(t: models::Team) -> Self {
-    TBATeam(format!("frc{}", t.number))
-  }
+    fn from(t: models::Team) -> Self {
+        TBATeam(format!("frc{}", t.number))
+    }
 }
 
 impl From<usize> for TBATeam {
-  fn from(tn: usize) -> Self {
-    TBATeam(format!("frc{}", tn))
-  }
+    fn from(tn: usize) -> Self {
+        TBATeam(format!("frc{}", tn))
+    }
 }
 
 impl TBATeams {
-  pub async fn issue(kv: &kv::KVConnection) -> anyhow::Result<()> {
-    let teams = models::Team::all(kv)?;
-    let tba_teams = TBATeams(teams.iter().map(|t| TBATeam::from(t.clone())).collect());
-    TBAClient::post("team_list", "update", &tba_teams, kv).await?;
-    Ok(())
-  }
+    pub async fn issue(kv: &kv::KVConnection) -> anyhow::Result<()> {
+        let teams = models::Team::all(kv)?;
+        let tba_teams = TBATeams(teams.iter().map(|t| TBATeam::from(t.clone())).collect());
+        TBAClient::post("team_list", "update", &tba_teams, kv).await?;
+        Ok(())
+    }
 }
