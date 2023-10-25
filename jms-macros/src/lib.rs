@@ -346,7 +346,7 @@ pub fn derive_db_partial_update(input: TokenStream) -> TokenStream {
                 }
             }
         } else {
-            quote! {} 
+            quote! {}
         }
     });
 
