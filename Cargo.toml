@@ -22,5 +22,5 @@ members = [
   "jms-backup/jms-backup-lib"
 ]
 
-resolver = "1"
+resolver = "2"
 
