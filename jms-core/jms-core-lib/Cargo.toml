@@ -15,7 +15,7 @@ jms-macros = { path = "../../jms-macros" }
 log = "0.4.19"
 rand = "0.8.5"
 redis-macros = "0.2.1"
-schemars = { version = "0.8.12", features = ["chrono"] }
+schemars = { version = "0.8.15", features = ["chrono"] }
 serde = "1.0.174"
 strum = { version = "0.25.0", features = ["derive"] }
 uuid = { version = "1.4.1", features = ["v4"] }

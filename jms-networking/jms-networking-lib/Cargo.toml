@@ -12,5 +12,5 @@ jms-base = { path = "../../jms-base" }
 jms-core-lib = { path = "../../jms-core/jms-core-lib" }
 jms-macros = { path = "../../jms-macros" }
 log = "0.4.19"
-schemars = "0.8.12"
+schemars = "0.8.15"
 serde = "1.0.183"

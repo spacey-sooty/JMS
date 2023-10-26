@@ -116,7 +116,7 @@ impl User {
     }
 
     pub fn set_pin(&mut self, pin: &str) {
-        self.pin_hash = Some(bcrypt::hash(pin.clone(), 10).unwrap());
+        self.pin_hash = Some(bcrypt::hash(pin, 10).unwrap());
         self.pin_is_numeric = pin.chars().all(char::is_numeric);
     }
 
