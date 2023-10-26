@@ -1,52 +1,65 @@
+mod reports;
 mod schedule;
 mod scoring;
-mod reports;
 
 use std::time::Duration;
 
-use jms_base::{kv::{self}, mq::MessageQueue, logging::JMSLogger};
-use jms_core_lib::{models::JmsComponent, db::Table};
+use jms_base::{
+    kv::{self},
+    logging::JMSLogger,
+    mq::MessageQueue,
+};
+use jms_core_lib::{db::Table, models::JmsComponent};
 use tokio::try_join;
 
 async fn component_svc(kv: &kv::KVConnection) -> anyhow::Result<()> {
-  let mut interval = tokio::time::interval(Duration::from_millis(500));
-  let mut component = JmsComponent::new("jms.core", "JMS-Core", "C", 1000);
+    let mut interval = tokio::time::interval(Duration::from_millis(500));
+    let mut component = JmsComponent::new("jms.core", "JMS-Core", "C", 1000);
 
-  component.insert(kv)?;
+    component.insert(kv)?;
 
-  loop {
-    interval.tick().await;
-    component.tick(kv)?;
-  }
+    loop {
+        interval.tick().await;
+        component.tick(kv)?;
+    }
 }
 
 async fn save_db_svc(kv: &kv::KVConnection) -> anyhow::Result<()> {
-  let mut interval = tokio::time::interval(Duration::from_millis(1000*60));   // Every 1 minute
-  loop {
-    interval.tick().await;
-    kv.bgsave()?;
-  }
+    let mut interval = tokio::time::interval(Duration::from_millis(1000 * 60)); // Every 1 minute
+    loop {
+        interval.tick().await;
+        kv.bgsave()?;
+    }
 }
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-  let _ = JMSLogger::init().await?;
-  
-  let kv = kv::KVConnection::new()?;
-  let mq = MessageQueue::new("arena-reply").await?;
+    let _ = JMSLogger::init().await?;
 
-  let mut mgsvc = schedule::GeneratorService { kv: kv.clone()?, mq: mq.channel().await? };
-  let mgfut = mgsvc.run();
+    let kv = kv::KVConnection::new()?;
+    let mq = MessageQueue::new("arena-reply").await?;
 
-  let mut rgsvc = reports::service::ReportGeneratorService { kv: kv.clone()?, mq: mq.channel().await? };
-  let rgfut = rgsvc.run();
+    let mut mgsvc = schedule::GeneratorService {
+        kv: kv.clone()?,
+        mq: mq.channel().await?,
+    };
+    let mgfut = mgsvc.run();
 
-  let ssvc = scoring::ScoringService { kv: kv.clone()?, mq: mq.channel().await? };
-  let sfut = ssvc.run();
+    let mut rgsvc = reports::service::ReportGeneratorService {
+        kv: kv.clone()?,
+        mq: mq.channel().await?,
+    };
+    let rgfut = rgsvc.run();
 
-  let dbfut = save_db_svc(&kv);
+    let ssvc = scoring::ScoringService {
+        kv: kv.clone()?,
+        mq: mq.channel().await?,
+    };
+    let sfut = ssvc.run();
 
-  try_join!(mgfut, rgfut, sfut, dbfut, component_svc(&kv))?;
+    let dbfut = save_db_svc(&kv);
 
-  Ok(())
+    try_join!(mgfut, rgfut, sfut, dbfut, component_svc(&kv))?;
+
+    Ok(())
 }

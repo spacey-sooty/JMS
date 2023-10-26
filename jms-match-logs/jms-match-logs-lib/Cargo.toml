@@ -8,5 +8,5 @@ edition = "2021"
 [dependencies]
 jms-core-lib = { path = "../../jms-core/jms-core-lib" }
 jms-driverstation-lib = { path = "../../jms-driverstation/jms-driverstation-lib" }
-schemars = "0.8.12"
+schemars = "0.8.15"
 serde = "1.0.183"

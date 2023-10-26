@@ -1,6 +1,12 @@
 use proc_macro::TokenStream;
 use quote::quote;
-use syn::{Attribute, Visibility, Ident, PatType, braced, parse::{ParseStream, Parse}, Token, FnArg, parenthesized, Pat, parse_macro_input, spanned::Spanned, Type, DeriveInput};
+use syn::{
+    braced, parenthesized,
+    parse::{Parse, ParseStream},
+    parse_macro_input,
+    spanned::Spanned,
+    Attribute, DeriveInput, FnArg, Ident, Pat, PatType, Token, Type, Visibility,
+};
 
 /* RPC */
 
@@ -59,10 +65,16 @@ impl Parse for RpcMethod {
                     args.push(captured);
                 }
                 FnArg::Typed(_) => {
-                    return Err(syn::Error::new(arg.span(), "patterns aren't allowed in RPC args"))
+                    return Err(syn::Error::new(
+                        arg.span(),
+                        "patterns aren't allowed in RPC args",
+                    ))
                 }
                 FnArg::Receiver(_) => {
-                    return Err(syn::Error::new(arg.span(), "method args cannot start with self"))
+                    return Err(syn::Error::new(
+                        arg.span(),
+                        "method args cannot start with self",
+                    ))
                 }
             }
         }
@@ -81,10 +93,20 @@ impl Parse for RpcMethod {
 }
 
 fn define_service_trait(svc: &Service) -> proc_macro2::TokenStream {
-    let Service { attrs, vis, ident, rpcs } = svc;
+    let Service {
+        attrs,
+        vis,
+        ident,
+        rpcs,
+    } = svc;
 
     let request_variants = rpcs.iter().map(|rpc| {
-        let RpcMethod { attrs: _, ident, args, output: _ } = rpc;
+        let RpcMethod {
+            attrs: _,
+            ident,
+            args,
+            output: _,
+        } = rpc;
         quote! {
             #[allow(non_camel_case_types)]
             #ident { #(#args),* }
@@ -92,7 +114,12 @@ fn define_service_trait(svc: &Service) -> proc_macro2::TokenStream {
     });
 
     let response_variants = rpcs.iter().map(|rpc| {
-        let RpcMethod { attrs: _, ident, args: _, output } = rpc;
+        let RpcMethod {
+            attrs: _,
+            ident,
+            args: _,
+            output,
+        } = rpc;
         quote! {
             #[allow(non_camel_case_types)]
             #ident(#output)
@@ -133,7 +160,7 @@ fn define_service_trait(svc: &Service) -> proc_macro2::TokenStream {
                         #(#rpc_call_body),*
                     };
                     let mq = self.mq();
-                    
+
                     // Send through our reply
                     match mq.rpc_reply(&msg.properties, response).await {
                         Ok(()) => (),
@@ -149,9 +176,14 @@ fn define_service_trait(svc: &Service) -> proc_macro2::TokenStream {
             }
         }
     };
-    
+
     let rpc_server_fns = rpcs.iter().map(|rpc| {
-        let RpcMethod { attrs, ident, args, output } = rpc;
+        let RpcMethod {
+            attrs,
+            ident,
+            args,
+            output,
+        } = rpc;
         quote! {
             #(#attrs)*
             async fn #ident(&mut self, #(#args),*) -> #output;
@@ -215,7 +247,8 @@ pub fn service(_attr: TokenStream, input: TokenStream) -> TokenStream {
 
     quote! {
         #trait_inner
-    }.into()
+    }
+    .into()
 }
 
 /* PARTIALS */
@@ -223,25 +256,38 @@ pub fn service(_attr: TokenStream, input: TokenStream) -> TokenStream {
 #[proc_macro_derive(Updateable)]
 pub fn derive_updateable(input: TokenStream) -> TokenStream {
     let DeriveInput {
-        attrs, vis, ident, generics: _, data
+        attrs,
+        vis,
+        ident,
+        generics: _,
+        data,
     } = parse_macro_input!(input as DeriveInput);
 
     let update_enum_ident = syn::Ident::new(&format!("{}Update", ident), ident.span());
 
     let fields = match data {
-        syn::Data::Struct(ref s) => s.fields.iter().filter_map(|field| field.ident.as_ref().map(|ident| ( field.vis.clone(), ident.clone(), field.ty.clone() ))),
-        _ => panic!("Updatables are only derived for structs.")
+        syn::Data::Struct(ref s) => s.fields.iter().filter_map(|field| {
+            field
+                .ident
+                .as_ref()
+                .map(|ident| (field.vis.clone(), ident.clone(), field.ty.clone()))
+        }),
+        _ => panic!("Updatables are only derived for structs."),
     };
 
-    let enum_fields = fields.clone().map(|(_field_vis, field_ident, field_type)| quote! {
-        #field_ident(#field_type)
-    });
-
-    let match_arms = fields.clone().map(|(_field_vis, field_ident, _field_type)| {
+    let enum_fields = fields.clone().map(|(_field_vis, field_ident, field_type)| {
         quote! {
-            Self::#field_ident(#field_ident) => full.#field_ident = #field_ident
+            #field_ident(#field_type)
         }
     });
+
+    let match_arms = fields
+        .clone()
+        .map(|(_field_vis, field_ident, _field_type)| {
+            quote! {
+                Self::#field_ident(#field_ident) => full.#field_ident = #field_ident
+            }
+        });
 
     let out = quote! {
         #[allow(non_camel_case_types)]
@@ -265,14 +311,23 @@ pub fn derive_updateable(input: TokenStream) -> TokenStream {
 #[proc_macro_derive(DbPartialUpdate)]
 pub fn derive_db_partial_update(input: TokenStream) -> TokenStream {
     let DeriveInput {
-        attrs: _, vis: _, ident, generics, data
+        attrs: _,
+        vis: _,
+        ident,
+        generics,
+        data,
     } = parse_macro_input!(input as DeriveInput);
 
     let (impl_generics, _ty_generics, where_clause) = generics.split_for_impl();
 
     let fields = match data {
-        syn::Data::Struct(ref s) => s.fields.iter().filter_map(|field| field.ident.as_ref().map(|ident| ( field.vis.clone(), ident.clone(), field.ty.clone() ))),
-        _ => panic!("Partials are only derived for structs.")
+        syn::Data::Struct(ref s) => s.fields.iter().filter_map(|field| {
+            field
+                .ident
+                .as_ref()
+                .map(|ident| (field.vis.clone(), ident.clone(), field.ty.clone()))
+        }),
+        _ => panic!("Partials are only derived for structs."),
     };
 
     let field_updates = fields.clone().map(|(field_vis, field_ident, field_type)| {
@@ -291,7 +346,7 @@ pub fn derive_db_partial_update(input: TokenStream) -> TokenStream {
                 }
             }
         } else {
-            quote! {} 
+            quote! {}
         }
     });
 

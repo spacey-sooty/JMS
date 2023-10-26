@@ -22,7 +22,7 @@ jms-match-logs-lib = { path = "../jms-match-logs/jms-match-logs-lib" }
 jms-tba-lib = { path = "../jms-tba/jms-tba-lib" }
 log = "0.4.19"
 regex = "1.9.1"
-schemars = "0.8.12"
+schemars = "0.8.15"
 serde = "1.0.174"
 serde_json = "1.0.103"
 tokio = { version = "1.29.1", features = ["full"] }

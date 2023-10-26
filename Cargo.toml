@@ -21,3 +21,6 @@ members = [
   "jms-backup",
   "jms-backup/jms-backup-lib"
 ]
+
+resolver = "2"
+

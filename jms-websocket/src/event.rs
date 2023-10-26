@@ -1,53 +1,94 @@
-use jms_core_lib::{models::{EventDetails, MaybeToken, Permission, ScheduleBlock, ScheduleBlockType, ScheduleBlockUpdate}, db::{Singleton, Table}};
+use jms_core_lib::{
+    db::{Singleton, Table},
+    models::{
+        EventDetails, MaybeToken, Permission, ScheduleBlock, ScheduleBlockType, ScheduleBlockUpdate,
+    },
+};
 
 use crate::ws::WebsocketContext;
 
 #[jms_websocket_macros::websocket_handler]
 pub trait EventWebsocket {
-  #[publish]
-  async fn details(&self, ctx: &WebsocketContext) -> anyhow::Result<EventDetails> {
-    Ok(EventDetails::get(&ctx.kv)?)
-  }
-
-  #[endpoint]
-  async fn update(&self, ctx: &WebsocketContext, token: &MaybeToken, details: EventDetails) -> anyhow::Result<EventDetails> {
-    token.auth(&ctx.kv)?.require_permission(&[Permission::ManageEvent])?;
-    details.update(&ctx.kv)?;
-    Ok(details)
-  }
-
-  // Schedule
-
-  #[endpoint]
-  async fn schedule_get(&self, ctx: &WebsocketContext, _token: &MaybeToken) -> anyhow::Result<Vec<ScheduleBlock>> {
-    Ok(ScheduleBlock::all(&ctx.kv)?)
-  }
-
-  #[endpoint]
-  async fn schedule_new_block(&self, ctx: &WebsocketContext, token: &MaybeToken, block_type: ScheduleBlockType, name: String, start: chrono::DateTime<chrono::Local>, end: chrono::DateTime<chrono::Local>) -> anyhow::Result<ScheduleBlock> {
-    token.auth(&ctx.kv)?.require_permission(&[Permission::ManageSchedule])?;
-    let block = ScheduleBlock::new(block_type, name, start, end);
-    block.insert(&ctx.kv)?;
-    Ok(block)
-  }
-
-  #[endpoint]
-  async fn schedule_delete(&self, ctx: &WebsocketContext, token: &MaybeToken, block_id: String) -> anyhow::Result<()> {
-    token.auth(&ctx.kv)?.require_permission(&[Permission::ManageSchedule])?;
-    ScheduleBlock::delete_by(&block_id, &ctx.kv)?;
-    Ok(())
-  }
-
-  #[endpoint]
-  async fn schedule_edit(&self, ctx: &WebsocketContext, token: &MaybeToken, block_id: String, updates: Vec<ScheduleBlockUpdate>) -> anyhow::Result<ScheduleBlock> {
-    token.auth(&ctx.kv)?.require_permission(&[Permission::ManageSchedule])?;
-    let mut block = ScheduleBlock::get(&block_id, &ctx.kv)?;
-    for update in updates {
-      update.apply(&mut block);
+    #[publish]
+    async fn details(&self, ctx: &WebsocketContext) -> anyhow::Result<EventDetails> {
+        Ok(EventDetails::get(&ctx.kv)?)
     }
-    block.insert(&ctx.kv)?;
-    Ok(block)
-  }
+
+    #[endpoint]
+    async fn update(
+        &self,
+        ctx: &WebsocketContext,
+        token: &MaybeToken,
+        details: EventDetails,
+    ) -> anyhow::Result<EventDetails> {
+        token
+            .auth(&ctx.kv)?
+            .require_permission(&[Permission::ManageEvent])?;
+        details.update(&ctx.kv)?;
+        Ok(details)
+    }
+
+    // Schedule
+
+    #[endpoint]
+    async fn schedule_get(
+        &self,
+        ctx: &WebsocketContext,
+        _token: &MaybeToken,
+    ) -> anyhow::Result<Vec<ScheduleBlock>> {
+        Ok(ScheduleBlock::all(&ctx.kv)?)
+    }
+
+    #[endpoint]
+    async fn schedule_new_block(
+        &self,
+        ctx: &WebsocketContext,
+        token: &MaybeToken,
+        block_type: ScheduleBlockType,
+        name: String,
+        start: chrono::DateTime<chrono::Local>,
+        end: chrono::DateTime<chrono::Local>,
+    ) -> anyhow::Result<ScheduleBlock> {
+        token
+            .auth(&ctx.kv)?
+            .require_permission(&[Permission::ManageSchedule])?;
+        let block = ScheduleBlock::new(block_type, name, start, end);
+        block.insert(&ctx.kv)?;
+        Ok(block)
+    }
+
+    #[endpoint]
+    async fn schedule_delete(
+        &self,
+        ctx: &WebsocketContext,
+        token: &MaybeToken,
+        block_id: String,
+    ) -> anyhow::Result<()> {
+        token
+            .auth(&ctx.kv)?
+            .require_permission(&[Permission::ManageSchedule])?;
+        ScheduleBlock::delete_by(&block_id, &ctx.kv)?;
+        Ok(())
+    }
+
+    #[endpoint]
+    async fn schedule_edit(
+        &self,
+        ctx: &WebsocketContext,
+        token: &MaybeToken,
+        block_id: String,
+        updates: Vec<ScheduleBlockUpdate>,
+    ) -> anyhow::Result<ScheduleBlock> {
+        token
+            .auth(&ctx.kv)?
+            .require_permission(&[Permission::ManageSchedule])?;
+        let mut block = ScheduleBlock::get(&block_id, &ctx.kv)?;
+        for update in updates {
+            update.apply(&mut block);
+        }
+        block.insert(&ctx.kv)?;
+        Ok(block)
+    }
 }
 
 // use super::{ws::{WebsocketHandler, Websocket, WebsocketContext}, WebsocketMessage2JMS};
@@ -116,7 +157,7 @@ pub trait EventWebsocket {
 //             EventMessageSchedule2JMS::NewBlock => { models::ScheduleBlock::append_default(&ws.context.kv)?; },
 //             EventMessageSchedule2JMS::DeleteBlock(block_id) => { models::ScheduleBlock::delete_by(&block_id, &ws.context.kv)?; },
 //             EventMessageSchedule2JMS::UpdateBlock(block) => { block.insert(&ws.context.kv)?; },
-//             EventMessageSchedule2JMS::LoadDefault(timestamp) => { 
+//             EventMessageSchedule2JMS::LoadDefault(timestamp) => {
 //               let start_day = chrono::Local.from_utc_datetime(&chrono::NaiveDateTime::from_timestamp((timestamp).try_into()?, 0)).date();
 //               models::ScheduleBlock::generate_default_2day(start_day, &ws.context.kv)?;
 //             },
