@@ -19,11 +19,7 @@ pub struct DriverStationElectronics {
 }
 
 impl DriverStationElectronics {
-    pub fn new(
-        alliance: Alliance,
-        ip: Option<IpAddr>,
-        kv: kv::KVConnection,
-    ) -> Self {
+    pub fn new(alliance: Alliance, ip: Option<IpAddr>, kv: kv::KVConnection) -> Self {
         Self {
             alliance,
             ip: ip.unwrap_or(IpAddr::V4(Ipv4Addr::new(

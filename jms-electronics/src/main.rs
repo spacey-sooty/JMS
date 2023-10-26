@@ -91,10 +91,8 @@ async fn main() -> anyhow::Result<()> {
     };
 
     let ds_elec_futs = if std::env::var("DS_ELECTRONICS").is_ok() {
-        let blue =
-            DriverStationElectronics::new(Alliance::Blue, None, kv.clone()?);
-        let red =
-            DriverStationElectronics::new(Alliance::Red, None, kv.clone()?);
+        let blue = DriverStationElectronics::new(Alliance::Blue, None, kv.clone()?);
+        let red = DriverStationElectronics::new(Alliance::Red, None, kv.clone()?);
 
         (blue.run().left_future(), red.run().left_future())
     } else {
