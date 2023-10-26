@@ -7,7 +7,7 @@ use std::{
 };
 
 use jms_arena_lib::AllianceStation;
-use jms_base::{kv, mq};
+use jms_base::kv;
 use jms_core_lib::{db::Table, models::Alliance};
 use tokio::net::TcpStream;
 use tokio_util::codec::{Decoder, FramedRead};
@@ -16,7 +16,6 @@ pub struct DriverStationElectronics {
     pub alliance: Alliance,
     pub ip: IpAddr,
     kv: kv::KVConnection,
-    mq: mq::MessageQueueChannel,
 }
 
 impl DriverStationElectronics {
@@ -24,7 +23,6 @@ impl DriverStationElectronics {
         alliance: Alliance,
         ip: Option<IpAddr>,
         kv: kv::KVConnection,
-        mq: mq::MessageQueueChannel,
     ) -> Self {
         Self {
             alliance,
@@ -35,7 +33,6 @@ impl DriverStationElectronics {
                 if alliance == Alliance::Blue { 21 } else { 22 },
             ))),
             kv,
-            mq,
         }
     }
 

@@ -169,7 +169,7 @@ async fn home_mode(args: &Args, iface: LinkMetadata) -> anyhow::Result<()> {
 mod interactive {
     use cursive::{
         theme::{BaseColor, Color, ColorStyle},
-        view::{Identifiable, Margins, Resizable},
+        view::{Margins, Resizable, Nameable},
         views::{Dialog, EditView, LinearLayout, PaddedView, TextView},
     };
     use jms_util::{net, WPAKeys};

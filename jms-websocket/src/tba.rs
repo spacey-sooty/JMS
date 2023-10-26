@@ -2,7 +2,7 @@ use jms_core_lib::{
     db::Singleton,
     models::{MaybeToken, Permission},
 };
-use jms_tba_lib::{TBARPCClient, TBASettings, TBASettingsUpdate, TBARPC};
+use jms_tba_lib::{TBARPCClient, TBASettings, TBASettingsUpdate};
 
 use crate::ws::WebsocketContext;
 
