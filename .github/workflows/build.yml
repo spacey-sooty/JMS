@@ -15,7 +15,7 @@ jobs:
     - name: Install Dependencies
       run: |
         npm install -g yarn
-        sudo apt install build-essentia pkg-config libssl-dev libncurses-dev libdbus-1-dev isc-dhcp-server
+        sudo apt install build-essential pkg-config libssl-dev libncurses-dev libdbus-1-dev isc-dhcp-server
     - name: Frontend
       run: |
         cd jms-ui
